@@ -2,6 +2,18 @@
 
 All notable changes to the Corporate Jargon Translator Outlook Add-in will be documented in this file.
 
+## [1.2.0] - 2026-06-16
+
+### Added
+- **Dual AI provider support** — choose between OpenAI (gpt-4o-mini) or Google Gemini (gemini-2.0-flash)
+- Dynamic API key fields that switch based on selected provider
+- Gemini API integration with system instruction support
+- Free Gemini tier link in the UI (aistudio.google.com/apikey)
+
+### Changed
+- API key fields now provider-specific (separate storage for OpenAI and Gemini keys)
+- Provider preference persists in localStorage between sessions
+
 ## [1.1.0] - 2026-06-16
 
 ### Added

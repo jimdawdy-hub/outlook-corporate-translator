@@ -15,9 +15,23 @@
 
     <div id="settings-panel">
       <div class="field">
-        <label for="api-key">OpenAI API Key</label>
-        <input type="password" id="api-key" placeholder="sk-..." />
+        <label for="provider">AI Provider</label>
+        <select id="provider">
+          <option value="openai">OpenAI &mdash; gpt-4o-mini</option>
+          <option value="gemini">Google Gemini &mdash; gemini-2.0-flash</option>
+        </select>
+      </div>
+
+      <div class="field" id="openai-key-field">
+        <label for="openai-key">OpenAI API Key</label>
+        <input type="password" id="openai-key" placeholder="sk-..." />
         <small>Stored locally in your browser. Never sent to our servers.</small>
+      </div>
+
+      <div class="field hidden" id="gemini-key-field">
+        <label for="gemini-key">Gemini API Key</label>
+        <input type="password" id="gemini-key" placeholder="AIza..." />
+        <small>Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com</a></small>
       </div>
 
       <div class="field">

@@ -1,6 +1,6 @@
 {
   "name": "outlook-corporate-translator",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Outlook add-in that translates plain English into corporate jargon using OpenAI",
   "scripts": {
     "start": "npx office-addin-debugging start manifest.xml",

@@ -2,11 +2,20 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Turns your boring plain English emails into elite executive doublespeak using OpenAI.
+Turns your boring plain English emails into elite executive doublespeak using AI.
 
 ## What it does
 
 Adds a **"Translate to Corporate"** button to your Outlook ribbon. Click it, pick a jargon intensity level, and watch your email get transformed into incomprehensible corporate prose.
+
+### AI Providers (cheapest models)
+
+| Provider | Model | Cost |
+|----------|-------|------|
+| **OpenAI** | gpt-4o-mini | ~$0.15 / 1M input tokens |
+| **Google Gemini** | gemini-2.0-flash | Free tier available, or ~$0.075 / 1M input tokens |
+
+Each user provides their own API key — enter it once and it's saved locally in your browser.
 
 ### Jargon Levels
 
@@ -21,7 +30,9 @@ Adds a **"Translate to Corporate"** button to your Outlook ribbon. Click it, pic
 
 - **Node.js** (v16+) — [Download](https://nodejs.org/)
 - **Outlook** — Desktop (Windows/Mac), Outlook on the Web, or New Outlook
-- **OpenAI API Key** — [Get one here](https://platform.openai.com/api-keys)
+- An API key from **one or both** providers:
+  - [OpenAI API Key](https://platform.openai.com/api-keys)
+  - [Gemini API Key](https://aistudio.google.com/apikey) (free tier available)
 
 ## Setup
 
@@ -48,13 +59,14 @@ This will:
 1. Open an email in Outlook (read or compose mode)
 2. Look for the **"Corporate Translator"** group in the ribbon/toolbar
 3. Click **"Translate to Corporate"**
-4. Enter your OpenAI API key (stored locally in your browser — never sent anywhere else)
-5. Pick your jargon intensity
-6. Click **"Translate to Corporate"**
-7. Review the translation, then choose your insert mode:
+4. Select your AI provider (OpenAI or Gemini)
+5. Enter your API key (stored locally in your browser — never sent to our servers)
+6. Pick your jargon intensity
+7. Click **"Translate to Corporate"**
+8. Review the translation, then choose your insert mode:
    - **Both** — Keeps your original text and appends the corporate translation below it
    - **Corporate Only** — Replaces the email with just the translation
-8. Click **Insert into Email** or **Copy to Clipboard**
+9. Click **Insert into Email** or **Copy to Clipboard**
 
 ## Manual Sideloading (if `npm start` doesn't auto-sideload)
 
@@ -66,7 +78,7 @@ This will:
 
 ### Outlook on the Web
 1. Open an email → Click **...** → Get Add-ins
-2. Click "My add-ins" → "Custom Add-ins" → "Add from file"
+2. Click "My add-ins" → "Custom Add-ins" → "Add from a file"
 3. Upload the `manifest.xml` file
 
 ## Project Structure
@@ -75,10 +87,11 @@ This will:
 outlook-corporate-translator/
 ├── manifest.xml          # Add-in manifest (tells Outlook what this plugin does)
 ├── package.json
+├── server.js             # Local HTTPS dev server
 ├── src/
 │   ├── taskpane.html     # Main UI panel
 │   ├── taskpane.css      # Styles
-│   ├── taskpane.js       # Core logic (Office.js + OpenAI API)
+│   ├── taskpane.js       # Core logic (Office.js + AI APIs)
 │   ├── commands.html     # Command handler stub
 │   └── commands.js       # Reserved for direct-action commands
 └── README.md
@@ -88,12 +101,12 @@ outlook-corporate-translator/
 
 1. **Office.js** — Microsoft's library for building add-ins. Gives us access to the email content.
 2. **Task Pane** — A side panel that opens in Outlook. This is where the UI lives.
-3. **OpenAI API** — We send the email text to GPT-4o-mini with a system prompt tuned to the selected jargon level.
-4. **Email Edit** — Insert as "Both" (original + translation stacked) or "Corporate Only" (replace entirely).
+3. **AI APIs** — Sends the email text to your chosen provider (OpenAI or Gemini) with a system prompt tuned to the selected jargon level.
+4. **Insert Modes** — "Both" keeps original + translation stacked. "Corporate Only" replaces entirely.
 
 ## Security Notes
 
-- Your OpenAI API key is stored in `localStorage` (your browser's local storage). It is never sent to any server other than OpenAI's API.
+- API keys are stored in `localStorage` (your browser's local storage). They are only sent to the provider you selected (OpenAI or Google) — never to our servers.
 - No analytics, no tracking, no data collection.
 - The add-in only has `ReadWriteItem` permission — it can read/modify the current email but nothing else.
 
@@ -103,8 +116,9 @@ outlook-corporate-translator/
 |---------|-----|
 | "Translate" button doesn't appear | Make sure the add-in is sideloaded. Check Outlook's add-in settings. |
 | "Could not read email body" | Make sure you have an email open. Try clicking on the email body first. |
-| API key error | Double-check your key starts with `sk-` and has not expired. |
-| CORS error in console | Shouldn't happen (OpenAI allows browser calls), but if it does, check your API key permissions. |
+| API key error (OpenAI) | Double-check your key starts with `sk-` and has not expired. |
+| API key error (Gemini) | Double-check your key starts with `AIza` and is enabled for the Gemini API. |
+| CORS error in console | Shouldn't happen (both providers allow browser calls), but check your API key permissions. |
 
 ## License
 

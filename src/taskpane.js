@@ -5,43 +5,52 @@ Office.onReady(function (info) {
 });
 
 function init() {
-  var apiKeyInput = document.getElementById("api-key");
+  var providerSelect = document.getElementById("provider");
+  var openaiKeyInput = document.getElementById("openai-key");
+  var geminiKeyInput = document.getElementById("gemini-key");
   var jargonSelect = document.getElementById("jargon-level");
   var insertModeSelect = document.getElementById("insert-mode");
   var translateBtn = document.getElementById("translate-btn");
   var insertBtn = document.getElementById("insert-btn");
   var copyBtn = document.getElementById("copy-btn");
 
-  var savedKey = localStorage.getItem("corp-translator-api-key");
-  if (savedKey) {
-    apiKeyInput.value = savedKey;
-  }
+  openaiKeyInput.value = localStorage.getItem("corp-xlator-openai-key") || "";
+  geminiKeyInput.value = localStorage.getItem("corp-xlator-gemini-key") || "";
+  providerSelect.value = localStorage.getItem("corp-xlator-provider") || "openai";
+  jargonSelect.value = localStorage.getItem("corp-xlator-jargon-level") || "medium";
+  insertModeSelect.value = localStorage.getItem("corp-xlator-insert-mode") || "both";
 
-  var savedLevel = localStorage.getItem("corp-translator-jargon-level");
-  if (savedLevel) {
-    jargonSelect.value = savedLevel;
-  }
+  toggleKeyFields(providerSelect.value);
 
-  var savedMode = localStorage.getItem("corp-translator-insert-mode");
-  if (savedMode) {
-    insertModeSelect.value = savedMode;
-  }
+  providerSelect.addEventListener("change", function () {
+    localStorage.setItem("corp-xlator-provider", providerSelect.value);
+    toggleKeyFields(providerSelect.value);
+  });
 
-  apiKeyInput.addEventListener("change", function () {
-    localStorage.setItem("corp-translator-api-key", apiKeyInput.value);
+  openaiKeyInput.addEventListener("change", function () {
+    localStorage.setItem("corp-xlator-openai-key", openaiKeyInput.value);
+  });
+
+  geminiKeyInput.addEventListener("change", function () {
+    localStorage.setItem("corp-xlator-gemini-key", geminiKeyInput.value);
   });
 
   jargonSelect.addEventListener("change", function () {
-    localStorage.setItem("corp-translator-jargon-level", jargonSelect.value);
+    localStorage.setItem("corp-xlator-jargon-level", jargonSelect.value);
   });
 
   insertModeSelect.addEventListener("change", function () {
-    localStorage.setItem("corp-translator-insert-mode", insertModeSelect.value);
+    localStorage.setItem("corp-xlator-insert-mode", insertModeSelect.value);
   });
 
   translateBtn.addEventListener("click", handleTranslate);
   insertBtn.addEventListener("click", handleInsert);
   copyBtn.addEventListener("click", handleCopy);
+}
+
+function toggleKeyFields(provider) {
+  document.getElementById("openai-key-field").classList.toggle("hidden", provider !== "openai");
+  document.getElementById("gemini-key-field").classList.toggle("hidden", provider !== "gemini");
 }
 
 function getSelectedText() {
@@ -76,14 +85,69 @@ function getSystemPrompt(level) {
   return prompts[level] || prompts.medium;
 }
 
+function callOpenAI(apiKey, systemPrompt, emailText) {
+  return fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + apiKey
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: emailText }
+      ],
+      temperature: 0.8,
+      max_tokens: 1000
+    })
+  }).then(function (response) {
+    if (!response.ok) {
+      return response.json().catch(function () { return {}; }).then(function (err) {
+        throw new Error(err.error?.message || "OpenAI request failed (status " + response.status + ")");
+      });
+    }
+    return response.json();
+  }).then(function (data) {
+    return data.choices[0].message.content.trim();
+  });
+}
+
+function callGemini(apiKey, systemPrompt, emailText) {
+  var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey;
+
+  return fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ parts: [{ text: emailText }] }],
+      generationConfig: { temperature: 0.8, maxOutputTokens: 1000 }
+    })
+  }).then(function (response) {
+    if (!response.ok) {
+      return response.json().catch(function () { return {}; }).then(function (err) {
+        throw new Error(err.error?.message || "Gemini request failed (status " + response.status + ")");
+      });
+    }
+    return response.json();
+  }).then(function (data) {
+    return data.candidates[0].content.parts[0].text.trim();
+  });
+}
+
 async function handleTranslate() {
-  var apiKey = document.getElementById("api-key").value.trim();
+  var provider = document.getElementById("provider").value;
   var jargonLevel = document.getElementById("jargon-level").value;
   var translateBtn = document.getElementById("translate-btn");
 
-  if (!apiKey) {
-    showStatus("Please enter your OpenAI API key.", "error");
-    return;
+  var apiKey;
+  if (provider === "openai") {
+    apiKey = document.getElementById("openai-key").value.trim();
+    if (!apiKey) { showStatus("Please enter your OpenAI API key.", "error"); return; }
+  } else {
+    apiKey = document.getElementById("gemini-key").value.trim();
+    if (!apiKey) { showStatus("Please enter your Gemini API key.", "error"); return; }
   }
 
   translateBtn.disabled = true;
@@ -98,32 +162,12 @@ async function handleTranslate() {
       return;
     }
 
-    showStatus("Sending to AI...", "info");
+    showStatus("Sending to " + (provider === "openai" ? "OpenAI" : "Gemini") + "...", "info");
 
-    var response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + apiKey
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: getSystemPrompt(jargonLevel) },
-          { role: "user", content: emailText }
-        ],
-        temperature: 0.8,
-        max_tokens: 1000
-      })
-    });
-
-    if (!response.ok) {
-      var err = await response.json().catch(function () { return {}; });
-      throw new Error(err.error?.message || "API request failed with status " + response.status);
-    }
-
-    var data = await response.json();
-    var translated = data.choices[0].message.content.trim();
+    var systemPrompt = getSystemPrompt(jargonLevel);
+    var translated = provider === "openai"
+      ? await callOpenAI(apiKey, systemPrompt, emailText)
+      : await callGemini(apiKey, systemPrompt, emailText);
 
     document.getElementById("original-text").textContent = emailText.substring(0, 500);
     document.getElementById("translated-text").textContent = translated;
