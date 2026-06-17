@@ -2,6 +2,14 @@
 
 All notable changes to the Corporate Jargon Translator Outlook Add-in will be documented in this file.
 
+## [1.2.1] - 2026-06-17
+
+### Fixed
+- Manifest schema validation errors preventing add-in installation
+- Removed invalid `DefaultRequirementSet` attribute from VersionOverrides `bt:Sets`
+- Capitalized `Mailbox` requirement set name (case-sensitive)
+- Removed unsupported `TaskpaneId` element from `ShowTaskpane` actions (v1.1 only)
+
 ## [1.2.0] - 2026-06-16
 
 ### Added

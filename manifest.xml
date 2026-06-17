@@ -6,7 +6,7 @@
            xsi:type="MailApp">
 
   <Id>1a2b3c4d-5e6f-7a8b-9c0d-e1f2a3b4c5d6</Id>
-  <Version>1.2.0</Version>
+  <Version>1.2.1</Version>
   <ProviderName>Corporate Translator</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Corporate Jargon Translator" />
@@ -48,8 +48,8 @@
 
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
     <Requirements>
-      <bt:Sets DefaultRequirementSet="mailbox">
-        <bt:Set Name="mailbox" MinVersion="1.1" />
+      <bt:Sets>
+        <bt:Set Name="Mailbox" MinVersion="1.1" />
       </bt:Sets>
     </Requirements>
 
@@ -74,7 +74,6 @@
                     <bt:Image size="80" resid="Icon.80x80" />
                   </Icon>
                   <Action xsi:type="ShowTaskpane">
-                    <TaskpaneId>CorporateTranslatorTaskpane</TaskpaneId>
                     <SourceLocation resid="Taskpane.Url" />
                   </Action>
                 </Control>
@@ -98,7 +97,6 @@
                     <bt:Image size="80" resid="Icon.80x80" />
                   </Icon>
                   <Action xsi:type="ShowTaskpane">
-                    <TaskpaneId>CorporateTranslatorTaskpane</TaskpaneId>
                     <SourceLocation resid="Taskpane.Url" />
                   </Action>
                 </Control>
