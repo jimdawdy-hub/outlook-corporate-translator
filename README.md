@@ -78,8 +78,10 @@ This will:
 
 ### Outlook on the Web
 1. Open an email → Click **...** → Get Add-ins
-2. Click "My add-ins" → "Custom Add-ins" → "Add from a file"
-3. Upload the `manifest.xml` file
+2. Click "My add-ins" → "Custom Add-ins" → **Add from a URL**
+3. Paste: `https://jimdawdy-hub.github.io/outlook-corporate-translator/manifest.xml`
+
+> **Note:** If your organization locks down add-in installation, you may need admin approval. The URL method works on personal accounts and unlocked org accounts.
 
 ## Project Structure
 
